@@ -10,9 +10,15 @@ ver02
 추가사항 5: 타일모양 변경 기능 추가
 추가사항 6: 넥스트 블럭 추가
 추가사항 7: 점수와 벽돌갯수 추가
+추가사항 8: 경과시간 추가
 */
 #include <Turboc.h>
 #include <conio.h>
+#include <Windows.h>
+#include <thread>
+
+using std::thread;
+
 
 #define LEFT 75		//왼쪽
 #define RIGHT 77	//오른쪽
@@ -40,6 +46,7 @@ BOOL MoveDown();								//벽돌을 한칸 아래로 이동시킨다. 만약 바닥에 닿았다면 Te
 void TestFull();								//수평으로 다 채워진 줄을 찾아 삭제한다.
 void DrawNext();								//넥스트 블럭을 보여주는 함수
 void PrintInfo();								//점수 상황을 보여주는 함수
+void PrintTime();								//경과시간 출력
 struct Point
 {
 	int x, y;
@@ -96,12 +103,15 @@ int brick, rot;				//이동중인 벽돌의 회전번호와 모양을 기억한다.
 int nbrick;					//넥스트 블럭
 int score;					//점수
 int bricknum;				//총 벽돌의 갯수
-
+int t;				//경과시간
 
 int main(void)
 {
 	int nFrame, nStay;	//nFrame:벽돌이 떨어지는 속도
 	int x, y;
+	thread t;
+
+	t = thread(PrintTime);
 
 	setcursortype(NOCURSOR);	//커서를 깜박거리게 못하게 하는 함수
 	randomize();
@@ -109,7 +119,7 @@ int main(void)
 	for (; 3;)
 	{
 		clrscr();					//화면을 모두 지운다.
-
+		t.join();					//시간 시작
 	/*반복문으로 만들어진 보드판 숫자2은 벽, 숫자0은 비어있는 공간
 		222222222222
 		200000000002
@@ -163,6 +173,7 @@ int main(void)
 		//무한루프
 		for (; 1;)
 		{
+
 			/*
 				sizeof(Shape) : 896바이트
 				sizeof(Shape[0]) : 128바이트
@@ -196,6 +207,7 @@ int main(void)
 				//nStay가 0이 될때 벽돌을 하나 내린다.
 				if (--nStay == 0)
 				{
+					PrintTime();
 					nStay = nFrame;
 
 					//MoveDown()이 참이라면 블럭이 내려왔다는 의미이므로 반복문을 나간다.
@@ -509,4 +521,9 @@ void PrintInfo()
 {
 	gotoxy(50, 9); printf("점수 : %d", score);
 	gotoxy(50, 10); printf("벽돌 : %d", bricknum);
+}
+
+void PrintTime()
+{
+	gotoxy(50, 11); printf("경과시간 : %d", t++);
 }
